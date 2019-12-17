@@ -4,38 +4,33 @@
 #
 version: 2
 jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: hashicorp/terraform:light
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    working_directory: ~/repo
 
   terraform_deploy_dev:
-    run:
-      name: terraform deploy dev
-      command: |
-        cd env/dev
-        export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
-        export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
-        terraform init
-        terraform plan
-        terraform apply --auto-approve
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          command: |
+            cd env/dev
+            export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+            terraform init
+            terraform plan
+            terraform apply --auto-approve
 
-  terraform_deploy_prod:
-    run:
-      command: |
-        cd env/prod
-        export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
-        export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
-        terraform init
-        terraform plan
+#    run:
+#      name: terraform deploy dev
+#
+#
+#  terraform_deploy_prod:
+#    run:
+#      command: |
+#        cd env/prod
+#        export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
+#        export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
+#        terraform init
+#        terraform plan
 
 #          terraform apply --auto-approve
 
@@ -49,6 +44,5 @@ workflows:
   version: 2
   build_plan_approve_apply:
     jobs:
-      - build
-      - terraform_deploy_dev:
-          type: approval
+      - terraform_deploy_dev
+#          type: approval
