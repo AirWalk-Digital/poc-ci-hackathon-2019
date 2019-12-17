@@ -20,7 +20,9 @@ jobs:
             terraform apply -auto-approve
       - persist_to_workspace:
               root: .
-              paths: env/dev
+              paths: 
+                - env/dev
+                - module
       
   terraform_prod_plan:
     docker:
