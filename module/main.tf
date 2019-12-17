@@ -5,10 +5,10 @@ provider "aws" {
 
 
 resource "aws_instance" "web-instance" {
-  ami                         = data.aws_ami.poc.id
-  instance_type               = "t2.nano"
+  ami = data.aws_ami.poc.id
+  instance_type = "t2.nano"
   associate_public_ip_address = true
-  
+
 
   tags = {
     Name = "web-instance"
@@ -23,10 +23,7 @@ rm -rf /usr/share/nginx/html/*
 service nginx start
 EOF
 
-
-
-
-output "web_domain" {
-  value = aws_instance.web-instance.public_dns
 }
-
+output "web_domain" {
+  value = "aws_instance.web-instance.public_dns
+}
