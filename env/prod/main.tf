@@ -6,4 +6,5 @@ provider "aws" {
 
 module "poc-ci" {
   source = "../../module"
+  instance_type = var.instance_type
 }

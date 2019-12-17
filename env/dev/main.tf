@@ -1,4 +1,5 @@
 provider "aws" {
+  profile = "default"
   region  = var.region
   version = ">= 2.36.0"
 }
@@ -6,4 +7,5 @@ provider "aws" {
 
 module "poc-ci" {
   source = "../../module"
+  instance_type = var.instance_type
 }

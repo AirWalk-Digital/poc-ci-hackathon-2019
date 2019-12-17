@@ -1,7 +1,7 @@
 
 resource "aws_instance" "web-instance" {
   ami                         = data.aws_ami.poc.id
-  instance_type               = "t2.nano"
+  instance_type               = var.instance_type
   associate_public_ip_address = true
 
 
