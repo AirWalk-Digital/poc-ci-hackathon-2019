@@ -54,7 +54,10 @@ workflows:
       - terraform_prod_plan:
           requires:
             - terraform_deploy_dev
-      - terraform_deploy_prod:
+      - approve:
           type: approval
           requires:
             - terraform_prod_plan
+      - terraform_deploy_prod:
+          requires:
+            - approve
