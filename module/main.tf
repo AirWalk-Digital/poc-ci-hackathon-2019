@@ -1,8 +1,3 @@
-provider "aws" {
-  region  = var.region
-  version = ">= 2.36.0"
-}
-
 
 resource "aws_instance" "web-instance" {
   ami                         = data.aws_ami.poc.id
