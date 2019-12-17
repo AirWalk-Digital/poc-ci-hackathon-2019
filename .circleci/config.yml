@@ -29,14 +29,32 @@ jobs:
             export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
             terraform init
-            terraform plan
+            terraform plan -out prod.plan
       - persist_to_workspace:
               root: .
               paths: env/prod
+  terraform_deploy_prod:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          command: |
+            cd env/prod
+            ls -al
+            pwd
+            terraform apply prod.plan
 
 workflows:
   version: 2
   build_plan_approve_apply:
     jobs:
       - terraform_deploy_dev
-      - terraform_prod_plan
+      - terraform_prod_plan:
+          requires:
+            - terraform_deploy_dev
+      - terraform_deploy_prod:
+          type: approval
+          requires:
+            - terraform_prod_plan
