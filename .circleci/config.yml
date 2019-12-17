@@ -75,7 +75,6 @@ workflows:
             - terraform_deploy_dev
       - approve:
           type: approval
-          release-timeout: 600
           requires:
             - terraform_prod_plan
       - terraform_deploy_prod:
@@ -83,4 +82,4 @@ workflows:
             - approve
       - terraform_destroy_dev:
           requires:
-            - approve
+            - terraform_prod_plan
