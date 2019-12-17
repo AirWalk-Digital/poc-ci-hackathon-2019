@@ -42,9 +42,9 @@ jobs:
       - run:
           command: |
             cd env/prod
-            ls -al
-            pwd
-            terraform apply prod.plan
+            export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
+            terraform apply prod.plan --auto-approve
 
 workflows:
   version: 2
