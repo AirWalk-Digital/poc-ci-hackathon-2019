@@ -45,7 +45,7 @@ jobs:
             chmod +x conftest
             ./conftest test tfplan.json
 
-  terraform_post_deployment_test: &terraform_post_deployment_test
+  terraform_dev_post_deployment_test:
     docker:
       - image: circleci/python:3.7.5-stretch
     steps:
@@ -123,11 +123,19 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
             sleep 120
             terraform destroy -auto-approve
+
   terraform_prod_post_deployment_test:
     docker:
-      - image: hashicorp/terraform:light
+      - image: circleci/python:3.7.5-stretch
     steps:
-      - *terraform_post_deployment_test
+      - attach_workspace:
+          at: .
+      - run:
+          command: |
+            cd tests
+            pip install boto3 --user
+            sleep 60
+            python post_deploy_test.py --access_key=$PROD_AWS_ACCESS_KEY_ID --secret_key=$DEV_AWS_SECRET_ACCESS_KEY --instance_id=$(cat output.txt | awk '{print $3}')
 
 workflows:
   version: 2
@@ -137,7 +145,7 @@ workflows:
       - terraform_deploy_dev:
           requires:
             - terraform_dev_config_test
-      - terraform_post_deployment_test:
+      - terraform_dev_post_deployment_test:
           requires:
             - terraform_deploy_dev
       - terraform_prod_config_test:
