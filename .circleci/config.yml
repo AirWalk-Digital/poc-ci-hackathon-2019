@@ -80,8 +80,6 @@ workflows:
           filters:
             tags:
               only: /^v.*/
-            branches:
-              ignore: /.*/
       - approve:
           type: approval
           requires:
