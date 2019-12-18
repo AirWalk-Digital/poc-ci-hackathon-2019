@@ -91,4 +91,4 @@ workflows:
             - approve
       - terraform_destroy_dev:
           requires:
-            - terraform_prod_plan
+            - terraform_deploy_dev
