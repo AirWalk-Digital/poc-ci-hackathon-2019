@@ -13,6 +13,7 @@ jobs:
       - run:
           command: |
             cd env/dev
+            echo "Current build tag: $CIRCLE_TAG"
             export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
             terraform init
@@ -32,6 +33,7 @@ jobs:
       - run:
           command: |
             cd env/prod
+            echo "Current build tag: $CIRCLE_TAG"
             export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
             terraform init
@@ -82,6 +84,11 @@ workflows:
       - terraform_deploy_prod:
           requires:
             - approve
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - terraform_destroy_dev:
           requires:
             - terraform_prod_plan
