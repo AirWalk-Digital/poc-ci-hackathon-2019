@@ -77,6 +77,11 @@ workflows:
       - terraform_prod_plan:
           requires:
             - terraform_deploy_dev
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - approve:
           type: approval
           requires:
@@ -84,11 +89,6 @@ workflows:
       - terraform_deploy_prod:
           requires:
             - approve
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
       - terraform_destroy_dev:
           requires:
             - terraform_prod_plan
