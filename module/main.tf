@@ -19,6 +19,6 @@ service nginx start
 EOF
 
 }
-output "web_domain" {
-  value = aws_instance.web-instance.public_dns
+output "instance_id" {
+  value = aws_instance.web-instance.id
 }

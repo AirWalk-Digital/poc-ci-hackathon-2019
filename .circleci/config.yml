@@ -19,10 +19,12 @@ jobs:
             terraform init
             terraform plan
             terraform apply -auto-approve
+            terraform output > ../../tests/output.txt
       - persist_to_workspace:
               root: .
               paths: 
                 - env/dev
+                - tests
                 - module
 
   terraform_dev_config_test:
@@ -47,12 +49,14 @@ jobs:
     docker:
       - image: hashicorp/terraform:light
     steps:
-      - checkout
+      - attach_workspace:
+          at: .
       - run:
           command: |
-            yum install python3
+            apt-get install python3
             cd tests
-            python post_deploy_test.py --access-key=$DEV_AWS_ACCESS_KEY_ID --secret-key=$DEV_AWS_SECRET_ACCESS_KEY
+            sleep 60
+            python post_deploy_test.py --access_key=$DEV_AWS_ACCESS_KEY_ID --secret_key=$DEV_AWS_SECRET_ACCESS_KEY --instance_id=$(cat output.txt | awk '{print $3}')
 
   terraform_prod_config_test:
     docker:
@@ -101,6 +105,10 @@ jobs:
             export AWS_ACCESS_KEY_ID=$PROD_AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$PROD_AWS_SECRET_ACCESS_KEY
             terraform apply prod.plan
+            terraform output > ../../output.txt
+      - persist_to_workspace:
+          root: .
+          paths: tests
 
   terraform_destroy_dev:
     docker:
@@ -148,3 +156,6 @@ workflows:
       - terraform_destroy_dev:
           requires:
             - terraform_deploy_dev
+      - terraform_post_deployment_test:
+          requires:
+            - terraform_deploy_prod
