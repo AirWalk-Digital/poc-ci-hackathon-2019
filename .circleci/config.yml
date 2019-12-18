@@ -17,23 +17,45 @@ jobs:
             export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
             terraform init
-            terraform plan -out=tfplan
-            terraform show -json ./tfplan > tfplan.json
+            terraform plan
             terraform apply -auto-approve
       - persist_to_workspace:
               root: .
               paths: 
                 - env/dev
                 - module
-  terraform_config_test:
+
+  terraform_dev_config_test:
     docker:
       - image: hashicorp/terraform:light
     steps:
-       - attach_workspace:
-          at: .
+       - checkout
        - run:
            command: |
             cd env/dev
+            export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+            terraform init
+            terraform plan -out=tfplan
+            terraform show -json ./tfplan > tfplan.json
+            wget https://github.com/instrumenta/conftest/releases/download/v0.15.0/conftest_0.15.0_Linux_x86_64.tar.gz
+            tar xzf conftest_0.15.0_Linux_x86_64.tar.gz
+            chmod +x conftest
+            ./conftest test tfplan.json
+
+  terraform_prod_config_test:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          command: |
+            cd env/prod
+            export AWS_ACCESS_KEY_ID=$DEV_AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
+            terraform init
+            terraform plan -out=tfplan
+            terraform show -json ./tfplan > tfplan.json
             wget https://github.com/instrumenta/conftest/releases/download/v0.15.0/conftest_0.15.0_Linux_x86_64.tar.gz
             tar xzf conftest_0.15.0_Linux_x86_64.tar.gz
             chmod +x conftest
@@ -87,25 +109,28 @@ workflows:
   version: 2
   build_plan_approve_apply:
     jobs:
-      - terraform_deploy_dev
-      - terraform_config_test:
+      - terraform_dev_config_test
+      - terraform_deploy_dev:
+          requires:
+            - terraform_dev_config_test
+      - terraform_prod_config_test:
           requires:
             - terraform_deploy_dev
-      - terraform_prod_plan:
-          requires:
-            - terraform_config_test
           filters:
             tags:
               only: /^v.*/
             branches:
               only: master
-      - approve:
+      - terraform_prod_plan:
+          requires:
+            - terraform_prod_config_test
+      - approve_prod_deployment:
           type: approval
           requires:
             - terraform_prod_plan
       - terraform_deploy_prod:
           requires:
-            - approve
+            - approve_prod_deployment
       - terraform_destroy_dev:
           requires:
             - terraform_deploy_dev
