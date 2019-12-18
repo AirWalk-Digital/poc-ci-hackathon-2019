@@ -43,6 +43,17 @@ jobs:
             chmod +x conftest
             ./conftest test tfplan.json
 
+  terraform_post_deployment_test:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          command: |
+            yum install python3
+            cd tests
+            python post_deploy_test.py --access-key=$DEV_AWS_ACCESS_KEY_ID --secret-key=$DEV_AWS_SECRET_ACCESS_KEY
+
   terraform_prod_config_test:
     docker:
       - image: hashicorp/terraform:light
@@ -113,6 +124,9 @@ workflows:
       - terraform_deploy_dev:
           requires:
             - terraform_dev_config_test
+      - terraform_post_deployment_test:
+          requires:
+            - terraform_deploy_dev
       - terraform_prod_config_test:
           requires:
             - terraform_deploy_dev
