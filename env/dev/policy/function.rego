@@ -1,7 +1,6 @@
-                           package tags_validation
+package tags_validation
 
-minimum_tags = {"Namee"}
-instance_types = {"t2.nanoi"}
+minimum_tags = {"Name"}
 
 tags_contain_proper_keys(tags) {
     keys := {key | tags[key]}
