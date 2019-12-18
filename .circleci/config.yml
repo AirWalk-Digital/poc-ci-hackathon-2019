@@ -124,6 +124,8 @@ jobs:
             sleep 60
             terraform destroy -auto-approve
   terraform_prod_post_deployment_test:
+    docker:
+      - image: hashicorp/terraform:light
     steps:
       - *terraform_post_deployment_test
 
