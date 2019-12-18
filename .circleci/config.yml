@@ -45,7 +45,7 @@ jobs:
             chmod +x conftest
             ./conftest test tfplan.json
 
-  terraform_post_deployment_test:
+  terraform_post_deployment_test: &terraform_post_deployment_test
     docker:
       - image: hashicorp/terraform:light
     steps:
@@ -123,6 +123,9 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=$DEV_AWS_SECRET_ACCESS_KEY
             sleep 60
             terraform destroy -auto-approve
+  terraform_prod_post_deployment_test:
+    steps:
+      - *terraform_post_deployment_test
 
 workflows:
   version: 2
@@ -156,6 +159,6 @@ workflows:
       - terraform_destroy_dev:
           requires:
             - terraform_deploy_dev
-      - terraform_post_deployment_test:
+      - terraform_prod_post_deployment_test:
           requires:
             - terraform_deploy_prod
