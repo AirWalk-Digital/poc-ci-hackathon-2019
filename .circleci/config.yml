@@ -54,7 +54,7 @@ jobs:
       - run:
           command: |
             cd tests
-            pip install boto3
+            pip install boto3 --user
             sleep 60
             python post_deploy_test.py --access_key=$DEV_AWS_ACCESS_KEY_ID --secret_key=$DEV_AWS_SECRET_ACCESS_KEY --instance_id=$(cat output.txt | awk '{print $3}')
 
